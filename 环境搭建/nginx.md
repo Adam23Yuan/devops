@@ -20,11 +20,22 @@
       tar -zxvf nginx-1.28.0.tar.gz
       cd nginx-1.28.0
       # 配置安装路径（默认会在 objs 目录生成二进制）
-      ./configure --prefix=/usr/local/nginx
+      ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_v2_module --with-http_sub_module --with-http_gzip_static_module --with-pcre
       # 编译
       make
       # 安装
       make install
+      
+      # 查看nginx 版本
+      [root@iZ2zeddamay9amikauf269Z cmd]# /usr/local/nginx/sbin/nginx -v
+      nginx version: nginx/1.28.0
+      [root@iZ2zeddamay9amikauf269Z cmd]# /usr/local/nginx/sbin/nginx -V
+      nginx version: nginx/1.28.0
+      built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) 
+      built with OpenSSL 1.0.2k-fips  26 Jan 2017
+      TLS SNI support enabled
+      configure arguments: --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_v2_module --with-http_sub_module --with-http_gzip_static_module --with-pcre
+      
       
       ```
 
@@ -40,7 +51,7 @@
       
       [Service]
       Type=forking
-      ExecStart=/usr/local/nginx/sbin/nginx
+      ExecStart=/usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
       ExecReload=/usr/local/nginx/sbin/nginx -s reload
       ExecStop=/usr/local/nginx/sbin/nginx -s quit
       PrivateTmp=true

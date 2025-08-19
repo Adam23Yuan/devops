@@ -18,6 +18,12 @@
       
       # 解压文件
       tar -zxvf nginx-1.28.0.tar.gz
+      
+      
+      # 注 # 如果是  CentOS Stream 9 操作系统 执行以下命令 安装相关编译依赖库
+      dnf install pcre pcre-devel zlib zlib-devel openssl openssl-devel wget -y
+      # 安装gcc环境 
+      yum -y install gcc-c++ make openssl openssl-devel libxml2 libxml2-devel libxslt-devel gd gd-devel GeoIP GeoIP-devel GeoIP-data
       cd nginx-1.28.0
       # 配置安装路径（默认会在 objs 目录生成二进制）
       ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_v2_module --with-http_sub_module --with-http_gzip_static_module --with-pcre
@@ -44,6 +50,8 @@
    1. ```
       # 创建服务文件
       touch /etc/systemd/system/nginx.service
+      
+      vim /etc/systemd/system/nginx.service
       # 复制以下内容 至 /etc/systemd/system/nginx.service 文件中
       [Unit]
       Description=The NGINX HTTP and reverse proxy server
@@ -67,6 +75,6 @@
       # 启动nginx
       systemctl start nginx
       ```
-
+      
       
 

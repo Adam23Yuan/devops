@@ -44,6 +44,7 @@
       Group=logstash
       ExecStart=/opt/logstash/bin/logstash --path.settings /opt/logstash/config
       Restart=always
+      RestartSec=10
       LimitNOFILE=65536
       
       [Install]
@@ -61,7 +62,7 @@
       # 查看日志
       journalctl -u logstash -f
       ```
-
+      
       
 
 ## 配置文件说明
@@ -639,14 +640,21 @@ filter {
   }
 
   # 2) 如果消息里有 timestamp 字段，解析为 @timestamp
+   # 如果消息里有 timestamp，映射为 @timestamp
   if [timestamp] {
     date {
-      match => ["timestamp", "ISO8601", "yyyy-MM-dd HH:mm:ss", "UNIX"] 
+      match => ["timestamp", "UNIX_MS"]   # 你的时间戳是 1755764922833（毫秒级）
       target => "@timestamp"
       remove_field => ["timestamp"]
     }
   }
-
+  # 3) 第二层解析 payload
+  if [payload] {
+    json {
+      source => "payload"
+      target => "payload_json"    # 建议放到一个子对象，避免字段冲突
+    }
+  }
   # 3) 将目标索引放到 @metadata，方便 output 使用而不进入 ES 文档
   mutate {
     add_field => { "[@metadata][target_index]" => "emqx-cloud-raw-message" }

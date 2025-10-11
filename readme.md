@@ -34,20 +34,44 @@ git push -u origin main
 
 ```mermaid
 flowchart TB
-  subgraph CLI[命令]
-    A[mvn package]
-    B[mvn spring-boot:repackage]
+  %% 定义子图 CLI
+  subgraph CLI["命令"]
+    A["mvn package"]
+    B["mvn spring-boot:repackage"]
   end
 
-  A -->|to package| PHASE[Package phase]
+  %% package 阶段
+  A -->|触发生命周期| PHASE["Package Phase"]
 
-  PHASE -->|default| JAR[JAR/WAR plugin]
-  PHASE -->|if configured| REPK[spring-boot repackage]
+  %% package 阶段触发的插件
+  PHASE -->|默认| JAR["JAR/WAR plugin"]
+  PHASE -->|如果配置了| REPK["spring-boot:repackage"]
 
-  B -->|explicit| REPK
+  %% 显式调用 repackage
+  B -->|显式执行| REPK
 
-  %% 注释用节点代替
-  PHASE_NOTE[package triggers lifecycle; spring-boot repackage runs if bound to package]
+  %% 注释说明
+  PHASE_NOTE["package 会触发 Maven 生命周期；spring-boot:repackage 如果绑定在 package 阶段则会执行"]
   PHASE --> PHASE_NOTE
 
 ```
+
+### **阿里云 Tair、Redis 协议、客户端** 的关系
+
+```mermaid
+flowchart LR
+    A[你的应用/客户端] -->|使用 Redis 协议| B[Tair / Redis 兼容版]
+    B -->|内部存储| C[Tair 分布式存储系统]
+    B -->|兼容 Redis 命令| D[Redis 命令集合]
+    C -->|持久化/分片| E[(数据节点/集群)]
+    F[官方 Redis 服务] -->|原生 Redis 命令| D
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#9f9,stroke:#333,stroke-width:2px
+    style C fill:#ff9,stroke:#333,stroke-width:2px
+    style D fill:#9ff,stroke:#333,stroke-width:2px
+    style E fill:#fcc,stroke:#333,stroke-width:2px
+    style F fill:#ccc,stroke:#333,stroke-width:2px
+
+```
+

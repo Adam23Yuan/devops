@@ -29,3 +29,25 @@ git branch -M main
 git push -u origin main
 
 ```
+
+### package vs repackage
+
+```mermaid
+flowchart TB
+  subgraph CLI[命令]
+    A[mvn package]
+    B[mvn spring-boot:repackage]
+  end
+
+  A -->|to package| PHASE[Package phase]
+
+  PHASE -->|default| JAR[JAR/WAR plugin]
+  PHASE -->|if configured| REPK[spring-boot repackage]
+
+  B -->|explicit| REPK
+
+  %% 注释用节点代替
+  PHASE_NOTE[package triggers lifecycle; spring-boot repackage runs if bound to package]
+  PHASE --> PHASE_NOTE
+
+```

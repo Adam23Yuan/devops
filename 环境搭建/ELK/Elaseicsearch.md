@@ -1,5 +1,7 @@
 # ELK 生态圈
 
+[下载地址Past Releases | Elastic](https://www.elastic.co/downloads/past-releases?product=kibana)
+
 ## Elasticsearch   8.19.2  tar.gz 方式
 1. 安装elasticsearch
 
@@ -292,3 +294,220 @@
                   ```
    
                   
+
+### 镜像源 安装 elasticsearch
+
+#### 镜像源添加
+
+1. 镜像源添加
+
+   1. ```bash
+      # 导入 Elasticsearch GPG 公钥
+      sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      
+      # 添加 elasticsearch YUM 仓库
+      cat > /etc/yum.repos.d/elasticsearch.repo <<EOF
+      [elasticsearch-8.x]
+      name=Elasticsearch repository for 8.x packages
+      baseurl=https://artifacts.elastic.co/packages/8.x/yum
+      gpgcheck=1
+      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      enabled=1
+      autorefresh=1
+      type=rpm-md
+      EOF
+      
+      # 更新缓存
+      yum makecache 
+      yum makecache fast
+      
+      ```
+
+      
+
+##### elasticsearch 安装
+
+1. elasticsearch 安装
+
+   1. ```bash
+      # 查看版本
+      yum --showduplicates list elasticsearch
+      # 安装指定版本
+      yum install elasticsearch-8.19.2-1
+      ```
+
+      
+
+### RPM 包的形式安装
+
+#### elasticsearch
+
+```bash
+rpm --install elasticsearch-8.19.2-x86_64.rpm
+Creating elasticsearch group... OK
+Creating elasticsearch user... OK
+--------------------------- Security autoconfiguration information ------------------------------
+
+Authentication and authorization are enabled.
+TLS for the transport and HTTP layers is enabled and configured.
+
+The generated password for the elastic built-in superuser is : AAc7KOmQLKcVSVwV9eNI
+
+If this node should join an existing cluster, you can reconfigure this with
+'/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token <token-here>'
+after creating an enrollment token on your existing cluster.
+
+You can complete the following actions at any time:
+
+Reset the password of the elastic built-in superuser with 
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with 
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with 
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+
+-------------------------------------------------------------------------------------------------
+### NOT starting on installation, please execute the following statements to configure elasticsearch service to start automatically using systemd
+ sudo systemctl daemon-reload
+ sudo systemctl enable elasticsearch.service
+### You can start elasticsearch service by executing
+ sudo systemctl start elasticsearch.service
+
+
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl daemon-reload
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl enable elasticsearch.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/elasticsearch.service to /usr/lib/systemd/system/elasticsearch.service.
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl start elasticsearch.service
+
+## 验证 elasticsearch 是否安装成功
+
+curl -u elastic:AAc7KOmQLKcVSVwV9eNI https://localhost:9200 --insecure
+
+
+## 创建数据目录 
+mkdir /mnt/vdb1/elasticsearch
+
+# 查看用户列表
+cat /etc/passwd
+[root@iZ2ze8q9293ytn6mlia8fuZ elasticsearch]# cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+nobody:x:99:99:Nobody:/:/sbin/nologin
+systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin
+dbus:x:81:81:System message bus:/:/sbin/nologin
+polkitd:x:999:998:User for polkitd:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin
+postfix:x:89:89::/var/spool/postfix:/sbin/nologin
+chrony:x:998:996::/var/lib/chrony:/sbin/nologin
+nscd:x:28:28:NSCD Daemon:/:/sbin/nologin
+tcpdump:x:72:72::/:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin
+elasticsearch:x:997:995:elasticsearch user:/nonexistent:/sbin/nologin
+
+
+# 查看创建的目录 权限
+[root@iZ2ze8q9293ytn6mlia8fuZ elasticsearch]# ls -ld /mnt/vdb1/elasticsearch
+drwxr-xr-x 4 root root 4096 10月 20 14:04 /mnt/vdb1/elasticsearch
+# 变更目录 权限，并查看
+[root@iZ2ze8q9293ytn6mlia8fuZ elasticsearch]# sudo chown -R elasticsearch:elasticsearch /mnt/vdb1/elasticsearch
+[root@iZ2ze8q9293ytn6mlia8fuZ elasticsearch]# ls -ld /mnt/vdb1/elasticsearch
+drwxr-xr-x 4 elasticsearch elasticsearch 4096 10月 20 14:04 /mnt/vdb1/elasticsearch
+
+#  启动 elasticsearch
+systemctl start elasticsearch
+
+```
+
+##### Kibana
+
+```
+[root@iZ2ze8q9293ytn6mlia8fuZ ~]# cd /opt/software
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# rpm --install /opt/software/kibana-8.19.2-x86_64.rpm
+Creating kibana group... OK
+Creating kibana user... OK
+Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/8.19/production.html#openssl-legacy-provider
+Created Kibana keystore in /etc/kibana/kibana.keystore
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# 
+
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl status kibana
+● kibana.service - Kibana
+   Loaded: loaded (/usr/lib/systemd/system/kibana.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+     Docs: https://www.elastic.co
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl daemon-reload
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl status kibana
+● kibana.service - Kibana
+   Loaded: loaded (/usr/lib/systemd/system/kibana.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+     Docs: https://www.elastic.co
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl enable kibana
+Created symlink from /etc/systemd/system/multi-user.target.wants/kibana.service to /usr/lib/systemd/system/kibana.service.
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl start kibana
+
+
+```
+
+##### Logstash
+
+```bash
+
+[root@iZ2ze8q9293ytn6mlia8fuZ ~]# cd /opt/software
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# rpm --install /opt/software/logstash-8.19.2-x86_64.rpm
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl status logstash
+● logstash.service - logstash
+   Loaded: loaded (/usr/lib/systemd/system/logstash.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+   
+# 验证 配置文件
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/emqx_cloud_rabbitmq_to_es.conf --config.test_and_exit
+Using bundled JDK: /usr/share/logstash/jdk
+WARNING: Could not find logstash.yml which is typically located in $LS_HOME/config or /etc/logstash. You can specify the path using --path.settings. Continuing using the defaults
+Could not find log4j2 configuration at path /usr/share/logstash/config/log4j2.properties. Using default config which logs errors to the console
+[WARN ] 2025-10-20 15:34:44.823 [main] runner - Starting from version 9.0, running with superuser privileges is not permitted unless you explicitly set 'allow_superuser' to true, thereby acknowledging the possible security risks
+[WARN ] 2025-10-20 15:34:44.828 [main] runner - NOTICE: Running Logstash as a superuser is strongly discouraged as it poses a security risk. Set 'allow_superuser' to false for better security.
+[WARN ] 2025-10-20 15:34:44.836 [main] runner - 'pipeline.buffer.type' setting is not explicitly defined.Before moving to 9.x set it to 'heap' and tune heap size upward, or set it to 'direct' to maintain existing behavior.
+[INFO ] 2025-10-20 15:34:44.837 [main] runner - Starting Logstash {"logstash.version"=>"8.19.2", "jruby.version"=>"jruby 9.4.9.0 (3.1.4) 2024-11-04 547c6b150e OpenJDK 64-Bit Server VM 21.0.7+6-LTS on 21.0.7+6-LTS +indy +jit [x86_64-linux]"}
+[INFO ] 2025-10-20 15:34:44.839 [main] runner - JVM bootstrap flags: [-Xms1g, -Xmx1g, -Djava.awt.headless=true, -Dfile.encoding=UTF-8, -Djruby.compile.invokedynamic=true, -XX:+HeapDumpOnOutOfMemoryError, -Djava.security.egd=file:/dev/urandom, -Dlog4j2.isThreadContextMapInheritable=true, -Djruby.regexp.interruptible=true, -Djdk.io.File.enableADS=true, --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED, --add-opens=java.base/java.security=ALL-UNNAMED, --add-opens=java.base/java.io=ALL-UNNAMED, --add-opens=java.base/java.nio.channels=ALL-UNNAMED, --add-opens=java.base/sun.nio.ch=ALL-UNNAMED, --add-opens=java.management/sun.management=ALL-UNNAMED, -Dio.netty.allocator.maxOrder=11]
+[INFO ] 2025-10-20 15:34:44.988 [main] StreamReadConstraintsUtil - Jackson default value override `logstash.jackson.stream-read-constraints.max-string-length` configured to `200000000` (logstash default)
+[INFO ] 2025-10-20 15:34:44.989 [main] StreamReadConstraintsUtil - Jackson default value override `logstash.jackson.stream-read-constraints.max-number-length` configured to `10000` (logstash default)
+[INFO ] 2025-10-20 15:34:44.989 [main] StreamReadConstraintsUtil - Jackson default value override `logstash.jackson.stream-read-constraints.max-nesting-depth` configured to `1000` (logstash default)
+[INFO ] 2025-10-20 15:34:44.997 [main] settings - Creating directory {:setting=>"path.queue", :path=>"/usr/share/logstash/data/queue"}
+[INFO ] 2025-10-20 15:34:44.998 [main] settings - Creating directory {:setting=>"path.dead_letter_queue", :path=>"/usr/share/logstash/data/dead_letter_queue"}
+[WARN ] 2025-10-20 15:34:45.139 [LogStash::Runner] multilocal - Ignoring the 'pipelines.yml' file because modules or command line options are specified
+[INFO ] 2025-10-20 15:34:46.409 [LogStash::Runner] Reflections - Reflections took 155 ms to scan 1 urls, producing 150 keys and 530 values
+[INFO ] 2025-10-20 15:34:46.463 [LogStash::Runner] json - ECS compatibility is enabled but `target` option was not specified. This may cause fields to be set at the top-level of the event where they are likely to clash with the Elastic Common Schema. It is recommended to set the `target` option to avoid potential schema conflicts (if your data is ECS compliant or non-conflicting, feel free to ignore this message)
+[INFO ] 2025-10-20 15:34:46.747 [LogStash::Runner] javapipeline - Pipeline `main` is configured with `pipeline.ecs_compatibility: v8` setting. All plugins in this pipeline will default to `ecs_compatibility => v8` unless explicitly configured otherwise.
+Configuration OK
+[INFO ] 2025-10-20 15:34:46.748 [LogStash::Runner] runner - Using config.test_and_exit mode. Config Validation Result: OK. Exiting Logstash
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# 
+ # 开机启动
+ [root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl enable logstash
+Created symlink from /etc/systemd/system/multi-user.target.wants/logstash.service to /usr/lib/systemd/system/logstash.service.
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl start logstash
+[root@iZ2ze8q9293ytn6mlia8fuZ software]# systemctl status logstash
+● logstash.service - logstash
+   Loaded: loaded (/usr/lib/systemd/system/logstash.service; enabled; vendor preset: disabled)
+   Active: active (running) since 一 2025-10-20 15:36:29 CST; 3s ago
+ Main PID: 29654 (java)
+   CGroup: /system.slice/logstash.service
+           └─29654 /usr/share/logstash/jdk/bin/java -Xms1g -Xmx1g -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djruby.compile.invokedynamic=true -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Dlog4j2.isThreadContextMapInherita...
+
+10月 20 15:36:29 iZ2ze8q9293ytn6mlia8fuZ systemd[1]: Started logstash.
+10月 20 15:36:29 iZ2ze8q9293ytn6mlia8fuZ logstash[29654]: Using bundled JDK: /usr/share/logstash/jdk
+
+```
+

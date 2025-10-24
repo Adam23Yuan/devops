@@ -117,7 +117,8 @@
       [root@iZ2ze8d2ahedv4d36gi3feZ software]# 
       
       
-      
+      # 列出仓库中可用的 rabbitmq-server 版本
+      yum --showduplicates list rabbitmq-server
       
       ```
 
